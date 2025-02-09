@@ -12,7 +12,7 @@ import PaymentsIcon from '@mui/icons-material/Payments'; // Spending icon
 import ShowChartIcon from '@mui/icons-material/ShowChart'; // Investing icon
 import { spending } from '../data/edu_spending';
 import { investing } from '../data/edu_investing';
-import { goals } from '../data/edu_goals';
+import { goals } from '../data/edu_goals.jsx';
 import { netWorth } from '../data/edu_netWorth';
 
 function Education() {
