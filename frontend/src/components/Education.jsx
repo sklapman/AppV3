@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Typography, Button, Box, Container, Grid, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Ensure this import
 import SchoolIcon from '@mui/icons-material/School';
@@ -8,7 +9,14 @@ import { goals } from '../data/edu_goals';
 import { netWorth } from '../data/edu_netWorth';
 
 function Education() {
+  const location = useLocation();
   const [selectedSection, setSelectedSection] = useState(null);
+
+  useEffect(() => {
+    if (location.state?.initialSection) {
+      setSelectedSection(location.state.initialSection);
+    }
+  }, [location]);
 
   const handleTileClick = (section) => {
     setSelectedSection(section);

@@ -35,6 +35,14 @@ export const netWorth = {
     {
       heading: "Debt Management",
       text: "Debt management involves crafting and executing a plan to repay money borrowed through credit cards, loans, or other forms of credit. High-interest debt—such as credit card balances—often poses the greatest risk to financial stability if left unchecked. By methodically prioritizing and repaying outstanding balances, you minimize interest costs and free up more cash for saving or investing. Some popular strategies include the “debt snowball” (paying off small balances first) or the “debt avalanche” (focusing on the highest interest rate first). Effective debt management not only improves your credit score but also relieves stress and paves the way for long-term financial success."
+    },
+    {
+      heading: "Track Your Net Worth",
+      text: "Ready to put this knowledge into practice? Use our Net Worth Tracker to start monitoring your financial progress.",
+      action: {
+        text: "Go to Net Worth Tracker",
+        link: "/net-worth"
+      }
     }
   ],
   details: "Key points about assessing net worth.",
