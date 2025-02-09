@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Typography, Button, Box, Container, Grid, Paper, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'; // Ensure this import
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SchoolIcon from '@mui/icons-material/School';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import TimelineIcon from '@mui/icons-material/Timeline';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges'; // Goals icon
+import PaymentsIcon from '@mui/icons-material/Payments'; // Spending icon
+import ShowChartIcon from '@mui/icons-material/ShowChart'; // Investing icon
 import { spending } from '../data/edu_spending';
 import { investing } from '../data/edu_investing';
 import { goals } from '../data/edu_goals';
@@ -29,6 +36,72 @@ function Education() {
     { title: "Investing", resource: investing }
   ];
 
+  const getActionButton = (section) => {
+    const actionConfigs = {
+      "Goals": {
+        icon: <TrackChangesIcon sx={{ mr: 2 }} />,
+        text: "Ready to set your financial goals?",
+        buttonText: "Go to Goals Tracker",
+        path: "/my-goals"
+      },
+      "Net Worth": {
+        icon: <AccountBalanceIcon sx={{ mr: 2 }} />,
+        text: "Ready to track your net worth?",
+        buttonText: "Go to Net Worth Tracker",
+        path: "/net-worth"
+      },
+      "Spending": {
+        icon: <PaymentsIcon sx={{ mr: 2 }} />,
+        text: "Ready to track your spending?",
+        buttonText: "Go to Spending Tracker",
+        path: "/spending"
+      },
+      "Investing": {
+        icon: <ShowChartIcon sx={{ mr: 2 }} />,
+        text: "Ready to start investing?",
+        buttonText: "Go to Investment Tracker",
+        path: "/investing"
+      }
+    };
+
+    const config = actionConfigs[section];
+    if (!config) return null;
+
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        mb: 3,
+        p: 2,
+        bgcolor: 'primary.main',
+        color: 'white',
+        borderRadius: 1
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {config.icon}
+          <Typography variant="h6">
+            {config.text}
+          </Typography>
+        </Box>
+        <Button
+          component={Link}
+          to={config.path}
+          variant="contained"
+          sx={{
+            bgcolor: 'white',
+            color: 'primary.main',
+            '&:hover': {
+              bgcolor: 'grey.100'
+            }
+          }}
+        >
+          {config.buttonText}
+        </Button>
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ pt: 4, pb: 8 }}>
       <Box
@@ -39,8 +112,8 @@ function Education() {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: 'linear-gradient(135deg, #fcc2a0 20%, #f29465 80%)', // Updated pastel gradient
-          color: '#5c4d4d', // Warm gray-brown text color
+          background: 'linear-gradient(135deg, #fcc2a0 20%, #f29465 80%)',
+          color: '#5c4d4d',
           textAlign: 'center',
           p: 2,
           position: 'relative',
@@ -56,10 +129,7 @@ function Education() {
         </Typography>
       </Box>
       <Container maxWidth="lg">
-        <Typography variant="body1" sx={{ mt: 4, mb: 2 }}>
-          Welcome to the Financial Education Center. Here, you will find comprehensive information on various financial topics, designed to help you understand the basics and advanced concepts of managing your finances effectively.
-        </Typography>
-        <Grid container spacing={2} sx={{ mt: 4 }}>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
           {sections.map((section, index) => (
             <Grid item xs={12} sm={6} md={3} key={index}>
               <Paper
@@ -67,14 +137,14 @@ function Education() {
                   p: 2,
                   textAlign: 'center',
                   cursor: 'pointer',
-                  background: selectedSection === section.title ? '#ffa8b7' : '#ffffff', // Updated pastel color
-                  color: selectedSection === section.title ? '#ffffff' : '#2d3436', // Updated text color
+                  background: selectedSection === section.title ? '#ffa8b7' : '#ffffff',
+                  color: selectedSection === section.title ? '#ffffff' : '#2d3436',
                   transition: 'all 0.2s ease',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   borderRadius: '8px',
                   '&:hover': {
-                    background: '#ffd0d9', // Updated hover color
-                    color: '#2d3436', // Updated hover text color
+                    background: '#ffd0d9',
+                    color: '#2d3436',
                     transform: 'translateY(-2px)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.12)'
                   }
@@ -89,6 +159,7 @@ function Education() {
         {selectedSection && (
           <Box sx={{ mt: 4 }}>
             <Paper elevation={3} sx={{ p: 3, mb: 4, borderRadius: 2, backgroundColor: '#f5f5f5' }}>
+              {getActionButton(selectedSection)}
               <Typography variant="body1">
                 {sections.find(section => section.title === selectedSection).resource.description}
               </Typography>

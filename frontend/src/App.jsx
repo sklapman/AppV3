@@ -11,6 +11,7 @@ import NetWorth from './components/NetWorth';
 import Register from './pages/Register';
 import Navbar from './components/Navbar';
 import logo from './logo.png';
+import Footer from './components/common/Footer';
 
 const theme = createTheme({
   palette: {
@@ -93,16 +94,24 @@ function App() {
       <Router>
         <Box
           sx={{
+            display: 'flex',
+            flexDirection: 'column',
             minHeight: '100vh',
             backgroundColor: 'background.default',
             backgroundImage: 'url("/path/to/your-texture.png")',
             backgroundSize: 'cover',
             backgroundRepeat: 'no-repeat',
-            paddingTop: '72px'
           }}
         >
           <Navbar />
-          <Container style={{ marginTop: '2rem' }}>
+          <Container 
+            component="main" 
+            sx={{ 
+              pt: '84px', // 64px (navbar height) + 20px padding
+              pb: 4,
+              flexGrow: 1
+            }}
+          >
             <Routes>
               <Route path="/" element={<Homepage />} />
               <Route path="/register" element={<Register />} />
@@ -113,6 +122,7 @@ function App() {
               <Route path="/net-worth" element={<NetWorth />} />
             </Routes>
           </Container>
+          <Footer />
         </Box>
       </Router>
     </ThemeProvider>
