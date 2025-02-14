@@ -21,6 +21,12 @@ function NetWorth() {
   const [items, setItems] = useState(defaultNetWorthData);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEduExpanded, setIsEduExpanded] = useState(true);
+  const [addingType, setAddingType] = useState('assets'); // Add this new state
+
+  const handleOpenAddModal = (type) => {
+    setAddingType(type);
+    setIsAddModalOpen(true);
+  };
 
   const handleAddItem = (newItem) => {
     setItems([...items, { ...newItem, id: Date.now() }]);
@@ -119,6 +125,21 @@ function NetWorth() {
                   </Grid>
                 ))}
             </Grid>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenAddModal('assets')}
+              fullWidth
+              sx={{
+                mt: 2,
+                borderRadius: 2,
+                padding: '12px 24px',
+                textTransform: 'none'
+              }}
+            >
+              Add New Asset
+            </Button>
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
@@ -140,6 +161,21 @@ function NetWorth() {
                   </Grid>
                 ))}
             </Grid>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenAddModal('liabilities')}
+              fullWidth
+              sx={{
+                mt: 2,
+                borderRadius: 2,
+                padding: '12px 24px',
+                textTransform: 'none'
+              }}
+            >
+              Add New Liability
+            </Button>
           </Paper>
         </Grid>
       </Grid>
@@ -182,32 +218,12 @@ function NetWorth() {
         </Paper>
       </Box>
 
-      {/* Floating Action Button */}
-      <Zoom in={true}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setIsAddModalOpen(true)}
-          sx={{
-            position: 'fixed',
-            bottom: 24,
-            right: 24,
-            borderRadius: 8,
-            padding: '12px 24px',
-            boxShadow: 3,
-            fontSize: '1rem',
-            textTransform: 'none'
-          }}
-        >
-          Add New Asset or Liability
-        </Button>
-      </Zoom>
-
       {/* Add Item Modal */}
       <AddItemModal
         open={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddItem}
+        initialType={addingType}
       />
     </>
   );
