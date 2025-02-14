@@ -25,7 +25,7 @@ const DebtGoalCard = ({ goal, onEdit, onDelete }) => {
       <CardContent sx={{ flex: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">{goal.title}</Typography>
-          <Box>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton onClick={() => onEdit(goal)} size="small">
               <EditIcon />
             </IconButton>

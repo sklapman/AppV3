@@ -26,7 +26,7 @@ const FinancialGoalForm = ({ onSubmit, onClose, initialData = null }) => {
     { value: 'EMERGENCY', label: 'Emergency Fund' },
     { value: 'HOME', label: 'Home Purchase' },
     { value: 'EDUCATION', label: 'Education' },
-    { value: 'OTHER', label: 'Other Savings' }
+    { value: 'OTHER_SAVINGS', label: 'Other Savings' }
   ];
 
   useEffect(() => {

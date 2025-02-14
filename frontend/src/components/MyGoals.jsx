@@ -67,19 +67,61 @@ const MyGoals = () => {
     });
   }, []);
 
+  const mapCategoryToGoalType = (category) => {
+    const mapping = {
+      'EMERGENCY': 'EMERGENCY',
+      'HOME': 'HOME',
+      'EDUCATION': 'EDUCATION',
+      'OTHER_SAVINGS': 'OTHER',
+      'MORTGAGE': 'MORTGAGE',
+      'STUDENT_LOAN': 'STUDENT_LOAN',
+      'CAR_LOAN': 'CAR_LOAN',
+      'CREDIT_CARD': 'CREDIT_CARD',
+      'OTHER_DEBT': 'OTHER'
+    };
+    return mapping[category] || 'OTHER';
+  };
+
   const fetchAllGoals = useCallback(async () => {
     try {
-      const [savingsResponse, debtResponse, personalResponse] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/saving-goals/`),
-        axios.get(`${API_BASE_URL}/api/debt-goals/`),
-        axios.get(`${API_BASE_URL}/api/personal-goals/`)
-      ]);
+      const response = await axios.get(`${API_BASE_URL}/api/networth-items/`);
+      const items = response.data;
+      
+      // Filter goal-related items
+      const assets = items.filter(item => 
+        !item.is_liability && 
+        ['EMERGENCY', 'HOME', 'EDUCATION', 'OTHER_SAVINGS'].includes(item.category)
+      );
+      
+      const liabilities = items.filter(item => 
+        item.is_liability && 
+        ['MORTGAGE', 'STUDENT_LOAN', 'CAR_LOAN', 'CREDIT_CARD', 'OTHER_DEBT'].includes(item.category)
+      );
+      
+      setSavingsGoals(assets.map(asset => ({
+        id: asset.id,
+        title: asset.name,
+        description: asset.description,
+        target_amount: asset.target_value || asset.value,
+        current_amount: asset.value,
+        goal_type: mapCategoryToGoalType(asset.category),
+        deadline: asset.target_date
+      })));
 
-      setSavingsGoals(savingsResponse.data);
-      setDebtGoals(debtResponse.data);
-      setPersonalGoals(personalResponse.data);
+      setDebtGoals(liabilities.map(liability => ({
+        id: liability.id,
+        title: liability.name,
+        description: liability.description,
+        initial_amount: Math.abs(liability.target_value || liability.value),
+        current_amount: Math.abs(liability.value),
+        debt_type: mapCategoryToGoalType(liability.category),
+        deadline: liability.target_date,
+        interest_rate: liability.interest_rate || 0
+      })));
+
     } catch (error) {
-      showAlert('Error fetching goals', 'error');
+      console.error('Error fetching items:', error);
+      showAlert('Error fetching items: ' + (error.response?.data?.detail || error.message), 'error');
     }
   }, [showAlert]);
 
