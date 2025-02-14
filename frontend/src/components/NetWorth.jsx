@@ -31,12 +31,21 @@ function NetWorth() {
   };
 
   const handleAddItem = (newItem) => {
-    setItems([...items, { ...newItem, id: Date.now() }]);
+    // Ensure new items are by default included on Goals Page
+    setItems([...items, { ...newItem, id: Date.now(), includeOnGoals: true }]);
   };
 
   const handleToggleExclude = (id) => {
     setItems(items.map(item => 
       item.id === id ? { ...item, excluded: !item.excluded } : item
+    ));
+  };
+
+  const handleToggleIncludeOnGoals = (id) => {
+    setItems(items.map(item =>
+      item.id === id
+        ? { ...item, includeOnGoals: !item.includeOnGoals }
+        : item
     ));
   };
 
@@ -170,6 +179,7 @@ function NetWorth() {
                       onToggleExclude={handleToggleExclude}
                       onDelete={handleDeleteItem}
                       onEdit={handleEditItem}
+                      onToggleIncludeOnGoals={handleToggleIncludeOnGoals}
                     />
                   </Grid>
                 ))}
@@ -207,6 +217,7 @@ function NetWorth() {
                       onToggleExclude={handleToggleExclude}
                       onDelete={handleDeleteItem}
                       onEdit={handleEditItem}
+                      onToggleIncludeOnGoals={handleToggleIncludeOnGoals}
                     />
                   </Grid>
                 ))}
