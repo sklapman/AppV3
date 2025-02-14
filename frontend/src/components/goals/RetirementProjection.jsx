@@ -149,11 +149,11 @@ const RetirementProjection = () => {
   };
 
   const CustomDot = (props) => {
-    const { cx, cy } = props;
+    const { cx, cy, ...rest } = props;
+    const safeCx = isNaN(cx) ? 0 : cx;
+    const safeCy = isNaN(cy) ? 0 : cy;
     return (
-      <svg x={cx - 12} y={cy - 12} width={24} height={24} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <RetirementIcon sx={{ color: '#ff7300', fontSize: 24 }} />
-      </svg>
+      <circle cx={safeCx} cy={safeCy} r={3} fill="red" {...rest} />
     );
   };
 

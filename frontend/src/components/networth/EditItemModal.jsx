@@ -58,18 +58,18 @@ const EditItemModal = ({ open, onClose, onEdit, item }) => {
           >
             {editedItem.type === 'assets' ? (
               [
-                <MenuItem value="Cash">Cash</MenuItem>,
-                <MenuItem value="Investments">Investments</MenuItem>,
-                <MenuItem value="Property">Property</MenuItem>,
-                <MenuItem value="Vehicles">Vehicles</MenuItem>,
-                <MenuItem value="Other">Other</MenuItem>
+                <MenuItem key="Cash" value="Cash">Cash</MenuItem>,
+                <MenuItem key="Investments" value="Investments">Investments</MenuItem>,
+                <MenuItem key="Property" value="Property">Property</MenuItem>,
+                <MenuItem key="Vehicles" value="Vehicles">Vehicles</MenuItem>,
+                <MenuItem key="Other" value="Other">Other</MenuItem>
               ]
             ) : (
               [
-                <MenuItem value="Credit Cards">Credit Cards</MenuItem>,
-                <MenuItem value="Loans">Loans</MenuItem>,
-                <MenuItem value="Mortgage">Mortgage</MenuItem>,
-                <MenuItem value="Other">Other</MenuItem>
+                <MenuItem key="Credit Cards" value="Credit Cards">Credit Cards</MenuItem>,
+                <MenuItem key="Loans" value="Loans">Loans</MenuItem>,
+                <MenuItem key="Mortgage" value="Mortgage">Mortgage</MenuItem>,
+                <MenuItem key="Other" value="Other">Other</MenuItem>
               ]
             )}
           </TextField>

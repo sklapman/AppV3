@@ -13,6 +13,13 @@ import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const FinancialGoalForm = ({ onSubmit, onClose, initialData = null }) => {
+  const GOAL_TYPES = [
+    { value: 'EMERGENCY', label: 'Emergency Fund' },
+    { value: 'HOME', label: 'Home Purchase' },
+    { value: 'EDUCATION', label: 'Education' },
+    { value: 'OTHER_SAVINGS', label: 'Other Savings' }
+  ];
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -22,32 +29,14 @@ const FinancialGoalForm = ({ onSubmit, onClose, initialData = null }) => {
     deadline: null
   });
 
-  const GOAL_TYPES = [
-    { value: 'EMERGENCY', label: 'Emergency Fund' },
-    { value: 'HOME', label: 'Home Purchase' },
-    { value: 'EDUCATION', label: 'Education' },
-    { value: 'OTHER_SAVINGS', label: 'Other Savings' }
-  ];
-
   useEffect(() => {
-    const defaultFormData = {
-      title: '',
-      description: '',
-      goal_type: 'EMERGENCY',
-      target_amount: '',
-      current_amount: '',
-      deadline: null
-    };
-
-    if (!initialData) {
-      setFormData(defaultFormData);
-    } else {
+    if (initialData) {
       setFormData({
         title: initialData.title || '',
         description: initialData.description || '',
         goal_type: initialData.goal_type || 'EMERGENCY',
-        target_amount: initialData.target_amount || '',
-        current_amount: initialData.current_amount || '',
+        target_amount: initialData.target_amount?.toString() || '',
+        current_amount: initialData.current_amount?.toString() || '',
         deadline: initialData.deadline ? new Date(initialData.deadline) : null
       });
     }

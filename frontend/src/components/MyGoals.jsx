@@ -86,41 +86,49 @@ const MyGoals = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/networth-items/`);
       const items = response.data;
+      console.log('API response:', items); // Debug: Log full API response
       
-      // Filter goal-related items
+      // Log each item for debugging
+      items.forEach(item => {
+        console.log(`Item ${item.id} => category: ${item.category}, is_liability: ${item.is_liability}, target_value: ${item.target_value}`);
+      });
+      
+      // Filter assets: adjust filtering if target_value is null by falling back to item.value
       const assets = items.filter(item => 
-        !item.is_liability && 
+        !item.is_liability &&
         ['EMERGENCY', 'HOME', 'EDUCATION', 'OTHER_SAVINGS'].includes(item.category)
-      );
-      
-      const liabilities = items.filter(item => 
-        item.is_liability && 
-        ['MORTGAGE', 'STUDENT_LOAN', 'CAR_LOAN', 'CREDIT_CARD', 'OTHER_DEBT'].includes(item.category)
       );
       
       setSavingsGoals(assets.map(asset => ({
         id: asset.id,
         title: asset.name,
         description: asset.description,
-        target_amount: asset.target_value || asset.value,
-        current_amount: asset.value,
-        goal_type: mapCategoryToGoalType(asset.category),
+        target_amount: asset.target_value != null ? asset.target_value : asset.value,
+        current_amount: Math.abs(asset.value),
+        goal_type: asset.category,
         deadline: asset.target_date
       })));
 
+      // Filter and map liabilities to debt goals
+      const liabilities = items.filter(item => 
+        item.is_liability && 
+        ['MORTGAGE', 'STUDENT_LOAN', 'CAR_LOAN', 'CREDIT_CARD', 'OTHER_DEBT'].includes(item.category)
+      );
+      
       setDebtGoals(liabilities.map(liability => ({
         id: liability.id,
         title: liability.name,
         description: liability.description,
         initial_amount: Math.abs(liability.target_value || liability.value),
         current_amount: Math.abs(liability.value),
-        debt_type: mapCategoryToGoalType(liability.category),
+        debt_type: liability.category,
         deadline: liability.target_date,
         interest_rate: liability.interest_rate || 0
       })));
 
     } catch (error) {
       console.error('Error fetching items:', error);
+      console.error('Error config:', error.config); // Log axios config for further inspection
       showAlert('Error fetching items: ' + (error.response?.data?.detail || error.message), 'error');
     }
   }, [showAlert]);
@@ -153,74 +161,61 @@ const MyGoals = () => {
     setDeleteConfirmOpen(true);
   };
 
-  const getEndpointFromGoalType = (goal) => {
-    if (goal.retirement_age !== undefined) return 'retirement-goals';
-    if (goal.debt_type !== undefined) return 'debt-goals';
-    if (goal.goal_type === 'EMERGENCY' || goal.goal_type === 'HOME' || goal.goal_type === 'EDUCATION' || goal.goal_type === 'OTHER') return 'saving-goals';
-    if (goal.progress !== undefined) return 'personal-goals';
-    return null;
-  };
-
   const handleDeleteConfirmed = async () => {
-    if (goalToDelete && selectedGoal) {
-      const endpoint = getEndpointFromGoalType(selectedGoal);
-      if (!endpoint) {
-        console.error('Could not determine goal type');
-        showAlert('Error deleting goal', 'error');
-        return;
-      }
+    if (!goalToDelete) return;
 
-      try {
-        await axios.delete(`${API_BASE_URL}/api/${endpoint}/${goalToDelete}/`);
-        await fetchAllGoals();
-        setDeleteConfirmOpen(false);
-        setOpenEditModal(false);
-        showAlert('Goal deleted successfully');
-      } catch (error) {
-        console.error('Error deleting goal:', error);
-        showAlert('Error deleting goal', 'error');
-      }
+    try {
+      await axios.delete(`${API_BASE_URL}/api/networth-items/${goalToDelete}/`);
+      await fetchAllGoals();
+      setDeleteConfirmOpen(false);
+      setOpenEditModal(false);
+      showAlert('Goal deleted successfully');
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      showAlert('Error deleting goal', 'error');
     }
   };
 
-  const handleEditSubmit = (e) => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedGoal) return;
 
-    const endpoint = getEndpointFromGoalType(selectedGoal);
-    if (!endpoint) {
-      console.error('Could not determine goal type');
-      return;
-    }
+    try {
+      let category = selectedGoal.goal_type;
+      if (goalType === 'DEBT') {
+        category = selectedGoal.debt_type || 'OTHER_DEBT';
+      }
 
-    if (!selectedGoal.title) {
-      showAlert('Title is required', 'error');
-      return;
-    }
-    if (!selectedGoal.target_amount) {
-      showAlert('Target amount is required', 'error');
-      return;
-    }
+      const formattedGoal = {
+        name: selectedGoal.title,
+        description: selectedGoal.description || '',
+        category: category,
+        value: goalType === 'DEBT' ? 
+          -Math.abs(parseFloat(selectedGoal.current_amount)) : 
+          parseFloat(selectedGoal.current_amount),
+        target_value: goalType === 'DEBT' ? 
+          0 : 
+          parseFloat(selectedGoal.target_amount),
+        target_date: selectedGoal.deadline ? 
+          new Date(selectedGoal.deadline).toISOString().split('T')[0] : 
+          null,
+        interest_rate: selectedGoal.interest_rate || null,
+        is_liability: goalType === 'DEBT'
+      };
 
-    const formattedGoal = {
-      ...selectedGoal,
-      deadline: selectedGoal.deadline ? new Date(selectedGoal.deadline).toISOString().split('T')[0] : null,
-      target_amount: parseFloat(selectedGoal.target_amount),
-      current_amount: parseFloat(selectedGoal.current_amount),
-      goal_type: selectedGoal.goal_type.toUpperCase()
-    };
+      await axios.put(
+        `${API_BASE_URL}/api/networth-items/${selectedGoal.id}/`, 
+        formattedGoal
+      );
 
-    axios.put(`${API_BASE_URL}/api/${endpoint}/${selectedGoal.id}/`, formattedGoal)
-      .then(() => {
-        fetchAllGoals();
-        setOpenEditModal(false);
-        setSelectedGoal(null);
-        showAlert('Goal updated successfully');
-      })
-      .catch(error => {
-        console.error('Error updating goal:', error);
-        showAlert(error?.response?.data?.detail || 'Error updating goal', 'error');
-      });
+      await fetchAllGoals();
+      setOpenEditModal(false);
+      setSelectedGoal(null);
+      showAlert('Goal updated successfully');
+    } catch (error) {
+      console.error('Error updating goal:', error);
+      showAlert(error?.response?.data?.detail || 'Error updating goal', 'error');
+    }
   };
 
   const handleAddGoal = useCallback((type) => {
@@ -232,8 +227,6 @@ const MyGoals = () => {
 
   const handleSubmit = useCallback(async (goalType, formData) => {
     try {
-      let endpoint;
-
       if (!formData.title?.trim()) {
         throw new Error('Title is required');
       }
@@ -241,61 +234,42 @@ const MyGoals = () => {
         throw new Error('Target amount is required');
       }
 
-      const processedData = {
-        ...formData,
-        title: formData.title.trim(),
-        target_amount: parseFloat(formData.target_amount || 0).toFixed(2),
-        current_amount: parseFloat(formData.current_amount || 0).toFixed(2),
-        goal_type: formData.goal_type ? formData.goal_type.toUpperCase() : 'OTHER',
-        deadline: formData.deadline ? new Date(formData.deadline).toISOString().split('T')[0] : null
-      };
-
-      Object.keys(processedData).forEach(key => {
-        if (processedData[key] === undefined || processedData[key] === null) {
-          delete processedData[key];
-        }
-      });
-
-      switch (goalType.toUpperCase()) {
-        case 'RETIREMENT':
-          endpoint = 'retirement-goals';
-          break;
-        case 'SAVINGS':
-        case 'OTHER':
-          endpoint = 'saving-goals';
-          break;
-        case 'DEBT':
-          endpoint = 'debt-goals';
-          break;
-        case 'PERSONAL':
-          endpoint = 'personal-goals';
-          break;
-        default:
-          throw new Error(`Invalid goal type: ${goalType}`);
+      let category = formData.goal_type;
+      if (goalType === 'DEBT') {
+        category = formData.debt_type || 'OTHER_DEBT';
       }
 
+      const processedData = {
+        name: formData.title.trim(),
+        description: formData.description || '',
+        category: category,
+        value: goalType === 'DEBT' ? 
+          -Math.abs(parseFloat(formData.current_amount || 0)) : 
+          parseFloat(formData.current_amount || 0),
+        target_value: goalType === 'DEBT' ? 
+          0 : 
+          parseFloat(formData.target_amount),
+        target_date: formData.deadline ? 
+          new Date(formData.deadline).toISOString().split('T')[0] : 
+          null,
+        interest_rate: formData.interest_rate || null,
+        is_liability: goalType === 'DEBT',
+        excluded: false
+      };
+
       await axios.post(
-        `${API_BASE_URL}/api/${endpoint}/`,
-        processedData,
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
+        `${API_BASE_URL}/api/networth-items/`,
+        processedData
       );
 
       await fetchAllGoals();
       setOpenModal(false);
       showAlert('Goal created successfully');
     } catch (error) {
-      const errorMessage = error.response?.data?.title?.[0] || 
-                          error.response?.data?.deadline?.[0] || 
-                          error.response?.data?.detail ||
-                          error.message ||
-                          'Error creating goal';
-      showAlert(errorMessage, 'error');
+      console.error('Error creating goal:', error);
+      showAlert(error?.response?.data?.detail || error.message || 'Error creating goal', 'error');
     }
-  }, [fetchAllGoals, showAlert, setOpenModal]);
+  }, [fetchAllGoals, showAlert]);
 
   const handleFormSubmit = useCallback((goalType, formData) => {
     handleSubmit(goalType, formData);
