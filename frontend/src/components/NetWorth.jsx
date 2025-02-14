@@ -16,12 +16,14 @@ import { netWorth as netWorthEdu } from '../data/edu_netWorth';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import Collapse from '@mui/material/Collapse';
+import EditItemModal from './networth/EditItemModal';
 
 function NetWorth() {
   const [items, setItems] = useState(defaultNetWorthData);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEduExpanded, setIsEduExpanded] = useState(true);
   const [addingType, setAddingType] = useState('assets'); // Add this new state
+  const [editingItem, setEditingItem] = useState(null);
 
   const handleOpenAddModal = (type) => {
     setAddingType(type);
@@ -42,6 +44,17 @@ function NetWorth() {
     setItems(items.filter(item => item.id !== id));
   };
 
+  const handleEditItem = (item) => {
+    setEditingItem(item);
+  };
+
+  const handleSaveEdit = (editedItem) => {
+    setItems(items.map(item => 
+      item.id === editedItem.id ? editedItem : item
+    ));
+    setEditingItem(null);
+  };
+
   const calculateNetWorth = () => {
     const included = items.filter(item => !item.excluded);
     const totalAssets = included
@@ -51,6 +64,17 @@ function NetWorth() {
       .filter(item => item.type === 'liabilities')
       .reduce((sum, item) => sum + item.value, 0);
     return totalAssets - totalLiabilities;
+  };
+
+  const calculateTotals = () => {
+    const included = items.filter(item => !item.excluded);
+    const totalAssets = included
+      .filter(item => item.type === 'assets')
+      .reduce((sum, item) => sum + item.value, 0);
+    const totalLiabilities = included
+      .filter(item => item.type === 'liabilities')
+      .reduce((sum, item) => sum + item.value, 0);
+    return { totalAssets, totalLiabilities };
   };
 
   return (
@@ -98,9 +122,33 @@ function NetWorth() {
         <Paper sx={{ p: 3, mb: 3 }}>
           <NetWorthGraph items={items} />
           <Divider sx={{ my: 3 }} />
-          <Typography variant="h4" align="center" gutterBottom>
-            Net Worth: ${calculateNetWorth().toLocaleString()}
-          </Typography>
+          <Grid container spacing={3} alignItems="center">
+            <Grid item xs={12} md={4}>
+              <Typography variant="h4" align="center" gutterBottom>
+                Net Worth: ${calculateNetWorth().toLocaleString()}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="h6" align="center" gutterBottom color="success.main">
+                  Total Assets
+                </Typography>
+                <Typography variant="h5" align="center" color="success.main">
+                  ${calculateTotals().totalAssets.toLocaleString()}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <Paper variant="outlined" sx={{ p: 2 }}>
+                <Typography variant="h6" align="center" gutterBottom color="error.main">
+                  Total Liabilities
+                </Typography>
+                <Typography variant="h5" align="center" color="error.main">
+                  ${calculateTotals().totalLiabilities.toLocaleString()}
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
         </Paper>
       </Box>
 
@@ -121,6 +169,7 @@ function NetWorth() {
                       item={item}
                       onToggleExclude={handleToggleExclude}
                       onDelete={handleDeleteItem}
+                      onEdit={handleEditItem}
                     />
                   </Grid>
                 ))}
@@ -157,6 +206,7 @@ function NetWorth() {
                       item={item}
                       onToggleExclude={handleToggleExclude}
                       onDelete={handleDeleteItem}
+                      onEdit={handleEditItem}
                     />
                   </Grid>
                 ))}
@@ -224,6 +274,14 @@ function NetWorth() {
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddItem}
         initialType={addingType}
+      />
+
+      {/* Edit Item Modal */}
+      <EditItemModal
+        open={Boolean(editingItem)}
+        onClose={() => setEditingItem(null)}
+        onEdit={handleSaveEdit}
+        item={editingItem}
       />
     </>
   );

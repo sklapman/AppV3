@@ -1,8 +1,8 @@
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Box, Typography, Grid } from '@mui/material';
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#4CAF50', '#F44336', '#FFBB28', '#FF8042']; // Green for assets, Red for liabilities
 
 function NetWorthGraph({ items }) {
   const totalNetWorthData = [
@@ -24,24 +24,17 @@ function NetWorthGraph({ items }) {
             Total Net Worth
           </Typography>
           <ResponsiveContainer width="100%" height={400}>
-            <PieChart>
-              <Pie
-                data={totalNetWorthData}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                fill="#8884d8"
-                dataKey="value"
-                labelLine={false}
-                label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-              >
-                {totalNetWorthData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
+            <BarChart data={totalNetWorthData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis tickFormatter={(value) => `$${(value/1000).toFixed(0)}K`} />
               <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
-              <Legend />
-            </PieChart>
+              <Bar dataKey="value" name="Value">
+                {totalNetWorthData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                ))}
+              </Bar>
+            </BarChart>
           </ResponsiveContainer>
         </Grid>
         <Grid item xs={12} md={4}>
