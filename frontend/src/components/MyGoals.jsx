@@ -84,7 +84,13 @@ const MyGoals = () => {
 
   const fetchAllGoals = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/networth-items/`);
+      const token = localStorage.getItem('token'); // Get JWT token
+      const response = await axios.get(`${API_BASE_URL}/api/networth-items/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
       const items = response.data;
       console.log('API response:', items); // Debug: Log full API response
       
@@ -128,8 +134,13 @@ const MyGoals = () => {
 
     } catch (error) {
       console.error('Error fetching items:', error);
-      console.error('Error config:', error.config); // Log axios config for further inspection
-      showAlert('Error fetching items: ' + (error.response?.data?.detail || error.message), 'error');
+      if (error.response?.status === 401) {
+        showAlert('Please log in to view your goals', 'error');
+        // Optionally redirect to login page
+        // window.location.href = '/login';
+      } else {
+        showAlert('Error fetching items: ' + (error.response?.data?.detail || error.message), 'error');
+      }
     }
   }, [showAlert]);
 
@@ -165,7 +176,13 @@ const MyGoals = () => {
     if (!goalToDelete) return;
 
     try {
-      await axios.delete(`${API_BASE_URL}/api/networth-items/${goalToDelete}/`);
+      const token = localStorage.getItem('token');
+      await axios.delete(`${API_BASE_URL}/api/networth-items/${goalToDelete}/`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
       await fetchAllGoals();
       setDeleteConfirmOpen(false);
       setOpenEditModal(false);
@@ -181,6 +198,7 @@ const MyGoals = () => {
     if (!selectedGoal) return;
 
     try {
+      const token = localStorage.getItem('token');
       let category = selectedGoal.goal_type;
       if (goalType === 'DEBT') {
         category = selectedGoal.debt_type || 'OTHER_DEBT';
@@ -205,7 +223,13 @@ const MyGoals = () => {
 
       await axios.put(
         `${API_BASE_URL}/api/networth-items/${selectedGoal.id}/`, 
-        formattedGoal
+        formattedGoal,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        }
       );
 
       await fetchAllGoals();
@@ -227,6 +251,7 @@ const MyGoals = () => {
 
   const handleSubmit = useCallback(async (goalType, formData) => {
     try {
+      const token = localStorage.getItem('token');
       if (!formData.title?.trim()) {
         throw new Error('Title is required');
       }
@@ -259,7 +284,13 @@ const MyGoals = () => {
 
       await axios.post(
         `${API_BASE_URL}/api/networth-items/`,
-        processedData
+        processedData,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        }
       );
 
       await fetchAllGoals();
