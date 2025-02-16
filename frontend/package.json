@@ -39,7 +39,16 @@
       "react-app",
       "react-app/jest",
       "eslint-config-prettier"
-    ]
+    ],
+    "env": {
+      "browser": true,
+      "es2022": true,
+      "node": true
+    },
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    }
   },
   "browserslist": {
     "production": [
