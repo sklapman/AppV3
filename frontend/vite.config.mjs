@@ -26,11 +26,11 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000, // Change this if needed
+    port: 4040, // Change this if needed
     open: true, // Auto-opens browser when running `yarn dev`
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:4040',
         changeOrigin: true,
       }
     }
